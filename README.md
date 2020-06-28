@@ -13,7 +13,7 @@ An Agar.io clone written in C for the TI-84 Plus CE calculator.
 - Constant movement
 
 ### Download
-- Download the CE C libraries if you don't already have them.
+- Download the [CE C Libraries](https://github.com/CE-Programming/libraries/releases/tag/v8.8) if you don't already have them.
 - Download AGARIO.8xp from the latest release.
 - Transfer these files to your TI-84 Plus CE with TI-Connect CE or CEMU.
 - Enjoy!
