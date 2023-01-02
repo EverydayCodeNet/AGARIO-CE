@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <tice.h>
 #include <keypadc.h>
 #include <graphx.h>
@@ -60,8 +61,7 @@ clone_t clones[5];
 //range for new player (avg,biggest)
 //could be used to respawn
 void createPlayers() {
-  int idx;
-  for (idx = 0; idx < maxPlayers; idx++) {
+  for (int idx = 0; idx < maxPlayers; idx++) {
     player_t* player = &(players[idx]);
     player->color = randInt(1,224);
     if (idx == 0) {
@@ -86,9 +86,8 @@ void createPlayers() {
 }
 
 void createFood() {
-    int idx;
     uint8_t randColor;
-    for (idx = 0; idx < foodCount; idx++) {
+    for (int idx = 0; idx < foodCount; idx++) {
       food_t* food = &(arrFood[idx]);
       randColor = randInt(1,224);
       gfx_SetColor(randColor);
@@ -246,10 +245,8 @@ void getFoodDistance(int idx, int otherIdx) {
 }
 
 void findEnemy() {
-  uint8_t idx;
-  uint8_t otherIdx;
-  unsigned int distance;
-  for (idx = 0; idx < maxPlayers; idx++) {
+  int distance;
+  for (int idx = 0; idx < maxPlayers; idx++) {
     player_t* player = &(players[idx]);
     for (otherIdx = 0; otherIdx < maxPlayers; otherIdx++) {
       //make sure the player doesn't make itself the enemy
@@ -261,7 +258,7 @@ void findEnemy() {
         }
       }
     }
-    for (otherIdx = 0; otherIdx < foodCount; otherIdx++) {
+    for (int otherIdx = 0; otherIdx < foodCount; otherIdx++) {
       food_t food = arrFood[otherIdx];
       getFoodDistance(idx,otherIdx);
     }
@@ -269,10 +266,8 @@ void findEnemy() {
 }
 
 void checkPlayers() {
-  int idx;
-  int otherIdx;
   //player eating player
-  for (idx = 0; idx < maxPlayers; idx++) {
+  for (int idx = 0; idx < maxPlayers; idx++) {
     player_t player = players[idx];
     if (player.i > topI) topI = player.i;
     for (otherIdx = 0; otherIdx < maxPlayers; otherIdx++) {
@@ -285,7 +280,7 @@ void checkPlayers() {
         }
       }
     }
-    for (otherIdx = 0; otherIdx < cloneCount; otherIdx++) {
+    for (int otherIdx = 0; otherIdx < cloneCount; otherIdx++) {
       clone_t clone = clones[otherIdx];
       if (getDistance(idx,otherIdx,1) < player.i + clone.i) {
         //only type 3 if idx of clone is not the child
@@ -302,12 +297,9 @@ void checkPlayers() {
 }
 
 void handleFood() {
-  uint8_t idx;
-  uint8_t otherIdx;
-  
-  for (idx = 0; idx < foodCount; idx++) {
+  for (int idx = 0; idx < foodCount; idx++) {
     food_t* food = &(arrFood[idx]);  
-    for (otherIdx = 0; otherIdx < cloneCount; otherIdx++) {
+    for (int otherIdx = 0; otherIdx < cloneCount; otherIdx++) {
       clone_t* clone = &(clones[otherIdx]);
       if (food->y > clone->y - clone->i && food->y < clone->y + clone->i 
       && food->x > clone->x - clone->i && food->x < clone->x + clone->i) {
@@ -333,8 +325,7 @@ void handleFood() {
 }
 
 void movePlayers() {
-  unsigned int idx;
-  for (idx = 1; idx < maxPlayers; idx++) {
+  for (int idx = 1; idx < maxPlayers; idx++) {
     player_t* player = &(players[idx]);
     player_t enemy = players[player->eIdx];
     if (player->i > 1.5 * enemy.i && player->eDistance < player->foodDistance) {
@@ -439,10 +430,9 @@ void handleKeys(kb_key_t keyLocal) {
 
 //move food and respawn it when it reaches edge
 void moveFood() {
-  int idx;
   player_t player = players[0];
   int dir = player.dir;
-  for (idx = 0; idx < foodCount; idx++) {
+  for (int idx = 0; idx < foodCount; idx++) {
     food_t* food = &(arrFood[idx]);
     if (dir == 1) {
       food->y = food->y + player.speed;
@@ -527,7 +517,7 @@ void startGame() {
   findEnemy();
 }
 
-void main(void) {
+int main(void) {
   gfx_Begin();
   startGame();
   do {
@@ -547,4 +537,5 @@ void main(void) {
     gfx_SwapDraw();
   } while (kb_Data[6] != kb_Clear);
   gfx_End();
+  return 0;
 }
