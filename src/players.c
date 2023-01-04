@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <players.h>
-#include <graphx.h>
 
 uint8_t maxPlayers = 8;
 int foodCount = 14;
@@ -40,8 +39,6 @@ void createPlayers() {
       player->eDistance = 100;
     }
     player->dir = randInt(1, 8);
-    gfx_SetColor(player->color);
-    gfx_FillCircle(player->x, player->y, player->i);
   }
 }
 
@@ -51,11 +48,9 @@ void createFood() {
     for (idx = 0; idx < foodCount; idx++) {
       food_t* food = &(arrFood[idx]);
       randColor = randInt(1,224);
-      gfx_SetColor(randColor);
       food->color = randColor;
       food->x = randInt(-160,480);
       food->y = randInt(-120,360);
-      gfx_FillRectangle(food->x,food->y,2,2);
     }
 }
 
@@ -101,8 +96,6 @@ void rescaleObj(int idx, int otherIdx, int type) {
       //slowest speed is 1
       if (otherPlayer->i <= 50) otherPlayer->speed = 50 / player->i;
       if (otherPlayer->i > 51) otherPlayer->speed = 1;
-      gfx_SetColor(otherPlayer->color);
-      gfx_FillCircle(otherPlayer->x, otherPlayer->y, otherPlayer->i);
     }
     player->i = player->i + 0.25 * otherPlayer->i;
   } else if (type == 1) {
