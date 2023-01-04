@@ -14,10 +14,6 @@
 
 kb_key_t key;
 
-void clearPlayers() {
-  gfx_FillScreen(255);
-}
-
 void doDeath() {
   player_t player = players[0];
   gfx_Begin();
@@ -34,11 +30,13 @@ void doDeath() {
     gfx_PrintInt(player.i,1);
     gfx_SwapDraw();
   } while (!os_GetCSC());
+
+  // reset game variables
   dead = 0;
   srand(rtc_Time());
   createFood();
   clearPlayers();
-  createPlayers();
+  createPlayers(); 
   topI = 0;
 }
 
@@ -66,47 +64,9 @@ void handleKeys(kb_key_t keyLocal) {
   }
 }
 
-void drawItems() {
-  int idx;
-  int scaledRadius;
-  for (idx = 0; idx < foodCount; idx++) {
-    food_t food = arrFood[idx];
-    gfx_SetColor(food.color);
-    gfx_FillRectangle(food.x,food.y,4,4);
-  }
-
-  for (idx = 0; idx < maxPlayers; idx++) {
-    player_t player = players[idx];
-    //scaledRadius = player.i * resizeVar;
-    gfx_SetColor(player.color);
-    gfx_FillCircle(player.x, player.y, player.i);
-  }
-  
-  for (idx = 0; idx < cloneCount; idx++) {
-    clone_t clone = clones[idx];
-    //scaledRadius = clone.i * resizeVar;
-    gfx_SetColor(clone.parentColor);
-    gfx_FillCircle(clone.x, clone.y, clone.i);
-  }
-  gfx_SetDrawBuffer();
-}
-
-void drawNames() {
-  player_t player = players[0];
-  if (dead == 0) {
-    //find center
-    gfx_PrintStringXY("YOU",player.x - gfx_GetStringWidth("YOU") / 2,player.y - 2);
-  }
-}
-
 void dispStats() {
   player_t player = players[0];
   gfx_SetTextScale(1,1);
-  //gfx_PrintStringXY("Direction: ",10,10);
-  /*if (player.dir == 1) gfx_PrintString("UP");
-  if (player.dir == 3) gfx_PrintString("RIGHT");
-  if (player.dir == 5) gfx_PrintString("DOWN");
-  if (player.dir == 7) gfx_PrintString("LEFT");*/
   if (player.dir == 1) gfx_PrintStringXY("^",player.x - 4,player.y - player.i - 8);
   if (player.dir == 3) gfx_PrintStringXY(">",player.x + player.i + 4,player.y - 4);
   if (player.dir == 5) gfx_PrintStringXY("v",player.x - 4,player.y + player.i + 4);
@@ -140,12 +100,7 @@ int main(void) {
     checkPlayers();
     movePlayers();
     // draw lines
-    /*drawGrid();
-    for (uint8_t i = 0; i < 16) {
-      gfx_HorizLine(-10,-10 + 10 * i,340);
-
-    }*/
-    //DRAW ARROWS IN THE DIRECTION of the PLAYER
+    // drawGrid();
     drawItems();
     dispStats();
     if (dead == 1) doDeath();
