@@ -19,8 +19,7 @@ clone_t clones[5];
 //range for new player (avg,biggest)
 //could be used to respawn
 void createPlayers() {
-  int idx;
-  for (idx = 0; idx < maxPlayers; idx++) {
+  for (int idx = 0; idx < maxPlayers; idx++) {
     player_t* player = &(players[idx]);
     player->color = randInt(1,224);
     if (idx == 0) {
@@ -130,10 +129,8 @@ int getDistance(int idx, int otherIdx, int type) {
 
   int x1 = player.x;
   int y1 = player.y;
-  int x2;
-  int y2;
+  int x2, y2;
   int xsqr,ysqr;
-  int distance;
 
   if (type == 1) {
     x2 = clone.x;
@@ -143,12 +140,7 @@ int getDistance(int idx, int otherIdx, int type) {
     y2 = otherPlayer.y; 
   } 
 
-  xsqr = (x2-x1) * (x2-x1);
-  ysqr = (y2-y1) * (y2-y1);
-
-  //distance formula
-  distance = sqrt(xsqr + ysqr);
-  return distance;
+  return sqrt(pow((x2 - x1),2) + pow((y2 - y1),2));
 }
 
 //find nearest food
@@ -157,13 +149,13 @@ void getFoodDistance(int idx, int otherIdx) {
   food_t food = arrFood[otherIdx];
   
   int x1,x2,y1,y2,xsqr,ysqr,distance;
+  
   x1 = player->x;
   y1 = player->y;
   x2 = food.x;
   y2 = food.y;
-  xsqr = (x2-x1) * (x2-x1);
-  ysqr = (y2-y1) * (y2-y1);
-  distance = sqrt(xsqr + ysqr);
+
+  distance = sqrt(pow((x2 - x1),2) + pow((y2 - y1),2));
 
   if (distance < player->foodDistance && player->foodDistance != 0 ) {
     player->foodDistance = distance;
@@ -259,8 +251,7 @@ void handleFood() {
 }
 
 void movePlayers() {
-  unsigned int idx;
-  for (idx = 1; idx < maxPlayers; idx++) {
+  for (int idx = 1; idx < maxPlayers; idx++) {
     player_t* player = &(players[idx]);
     player_t enemy = players[player->eIdx];
     if (player->i > 1.5 * enemy.i && player->eDistance < player->foodDistance) {
