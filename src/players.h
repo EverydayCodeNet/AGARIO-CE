@@ -12,7 +12,7 @@ typedef struct {
   int x;
   int y;
   //radius
-  int i;
+  unsigned int radius;
   uint8_t dir;
   uint8_t color;
   uint8_t speed;
@@ -25,13 +25,14 @@ typedef struct {
 typedef struct {
   int x;
   int y;
-  unsigned int i;
+  unsigned int radius;
   uint8_t dir;
   uint8_t speed;
   uint8_t parentIdx;
   uint8_t parentColor;
-  //if clone pos is empty in the array, fill it
+  // if clone pos is empty in the array, fill it
   uint8_t filled;
+  // replace filled attribute with shift array function
 } clone_t;
 
 typedef struct {
