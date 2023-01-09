@@ -2,19 +2,25 @@
 #include <stdlib.h>
 #include <players.h>
 
-uint8_t maxPlayers = 8;
+int maxPlayers = 10;
 int foodCount = 14;
 int cloneCount = 4;
-uint8_t foodConstant = 1;
 
-//largest player size
+// largest player size
 int topI;
 uint8_t dead = 0;
 
-//entity count is array size - 1
+// entity count is array size - 1
+// create these arrays within functions and pass pointers instead
 player_t players[9];
 food_t arrFood[15];
 clone_t clones[5];
+
+void shiftArray(int *arr[], int start, int end) {
+  for (int i = start; i < end; i++) {
+    arr[i] = arr[i + 1];
+  }
+}
 
 //range for new player (avg,biggest)
 //could be used to respawn
@@ -23,17 +29,18 @@ void createPlayers() {
     player_t* player = &(players[idx]);
     player->color = randInt(1,224);
     if (idx == 0) {
-      //player->i = randInt(8,15);
-      player->i = 20;
+      //player->radius = randInt(8,15);
+      player->radius = 20;
       player->x = 160;
       player->y = 120;
-      player->speed = 50 / player->i;
+      player->speed = 50 / player->radius;
     } else {
       player->x = randInt(-160,480);
       player->y = randInt(-120,360);
-      player->i = randInt(10,15);
-      player->speed = 50 / player->i;
-      //presets to encourage seeking
+      player->radius = randInt(10,15);
+      player->speed = 50 / player->radius;
+      // presets to encourage seeking
+      // can be replaced with INT_MAX
       player->foodDistance = 50;
       player->eDistance = 100;
     }
@@ -42,9 +49,8 @@ void createPlayers() {
 }
 
 void createFood() {
-    int idx;
     uint8_t randColor;
-    for (idx = 0; idx < foodCount; idx++) {
+    for (int idx = 0; idx < foodCount; idx++) {
       food_t* food = &(arrFood[idx]);
       randColor = randInt(1,224);
       food->color = randColor;
@@ -56,11 +62,11 @@ void createFood() {
 void mergeObj(int cloneIdx) {
   player_t* player = &(players[0]);
   clone_t* clone = &(clones[cloneIdx]);
-  player->i = player->i + 0.75 * clone->i;
-  if (player->i <= 50) player->speed = 50 / player->i;
-  if (player->i > 51) player->speed = 1;
+  player->radius = player->radius + 0.75 * clone->radius;
+  if (player->radius <= 50) player->speed = 50 / player->radius;
+  if (player->radius > 51) player->speed = 1;
   //remove clone
-  clone->i = 0;
+  clone->radius = 0;
   clone->filled = 0;
 }
 
@@ -68,9 +74,9 @@ void mergeObj(int cloneIdx) {
 void shiftClone(int idx) {
   player_t* player = &(players[0]);
   clone_t* clone = &(clones[idx]);
-  player->i = clone->i;
-  player->speed = 50 / player->i;
-  clone->i = 0;
+  player->radius = clone->radius;
+  player->speed = 50 / player->radius;
+  clone->radius = 0;
 }
 
 //respawn function to eliminate repeat code?
@@ -82,42 +88,42 @@ void rescaleObj(int idx, int otherIdx, int type) {
   if (type == 0) {
     player_t* player = &(players[idx]);
     player_t* otherPlayer = &(players[otherIdx]);
-    if (otherIdx == 0 && otherPlayer->i < player->i) {
+    if (otherIdx == 0 && otherPlayer->radius < player->radius) {
       dead = 1;
     } else {
       //place players back on the map
       otherPlayer->x = randInt(-310, 310);
       otherPlayer->y = randInt(-230, 230);
       //range(avg,top player)
-      otherPlayer->i = randInt(10,15);
+      otherPlayer->radius = randInt(10,15);
       otherPlayer->dir = randInt(1, 8);
       otherPlayer->color = randInt(1,224);
       //slowest speed is 1
-      if (otherPlayer->i <= 50) otherPlayer->speed = 50 / player->i;
-      if (otherPlayer->i > 51) otherPlayer->speed = 1;
+      if (otherPlayer->radius <= 50) otherPlayer->speed = 50 / player->radius;
+      if (otherPlayer->radius > 51) otherPlayer->speed = 1;
     }
-    player->i = player->i + 0.25 * otherPlayer->i;
+    player->radius = player->radius + 0.25 * otherPlayer->radius;
   } else if (type == 1) {
     player_t* player = &(players[idx]);
     clone_t* clone = &(clones[otherIdx]);
-    clone->i = clone->i + 0.25 * player->i;
-    if (clone->i <= 50) clone->speed = 50 / clone->i;
-    if (clone->i > 51) clone->speed = 1;
+    clone->radius = clone->radius + 0.25 * player->radius;
+    if (clone->radius <= 50) clone->speed = 50 / clone->radius;
+    if (clone->radius > 51) clone->speed = 1;
     // 40px off the edges
     // remove magic numbers
     player->x = randInt(-120,440);
     player->y = randInt(-200,320);
-    player->i = randInt(10,15);
+    player->radius = randInt(10,15);
     player->dir = randInt(1, 8);
     player->color = randInt(1,224);
-    player->speed = 50 / player->i;
+    player->speed = 50 / player->radius;
   } else if (type == 2 && idx != 0) {
     player_t* player = &(players[idx]);
     clone_t* clone = &(clones[otherIdx]);
-    player->i = player->i + 0.25 * clone->i;
-    if (player->i <= 50) player->speed = 50 / player->i;
-    if (player->i > 51) player->speed = 1;
-    clone->i = 0;
+    player->radius = player->radius + 0.25 * clone->radius;
+    if (player->radius <= 50) player->speed = 50 / player->radius;
+    if (player->radius > 51) player->speed = 1;
+    clone->radius = 0;
     clone->filled = 0;
   }
 }
@@ -149,7 +155,7 @@ void getFoodDistance(int idx, int otherIdx) {
   food_t food = arrFood[otherIdx];
   
   int x1,x2,y1,y2,xsqr,ysqr,distance;
-  
+
   x1 = player->x;
   y1 = player->y;
   x2 = food.x;
@@ -164,12 +170,10 @@ void getFoodDistance(int idx, int otherIdx) {
 }
 
 void findEnemy() {
-  uint8_t idx;
-  uint8_t otherIdx;
   unsigned int distance;
-  for (idx = 0; idx < maxPlayers; idx++) {
+  for (int idx = 0; idx < maxPlayers; idx++) {
     player_t* player = &(players[idx]);
-    for (otherIdx = 0; otherIdx < maxPlayers; otherIdx++) {
+    for (int otherIdx = 0; otherIdx < maxPlayers; otherIdx++) {
       //make sure the player doesn't make itself the enemy
       if (idx != otherIdx) {
         distance = getDistance(idx,otherIdx,0);
@@ -192,12 +196,12 @@ void checkPlayers() {
   //player eating player
   for (idx = 0; idx < maxPlayers; idx++) {
     player_t player = players[idx];
-    if (player.i > topI) topI = player.i;
+    if (player.radius > topI) topI = player.radius;
     for (otherIdx = 0; otherIdx < maxPlayers; otherIdx++) {
       player_t otherPlayer = players[otherIdx];
       //check if player size is big enough
-      if (player.i > otherPlayer.i) {
-        if (getDistance(idx,otherIdx,0) < player.i + otherPlayer.i) {
+      if (player.radius > otherPlayer.radius) {
+        if (getDistance(idx,otherIdx,0) < player.radius + otherPlayer.radius) {
           //player eating player
           rescaleObj(idx,otherIdx,0);
         }
@@ -205,14 +209,14 @@ void checkPlayers() {
     }
     for (otherIdx = 0; otherIdx < cloneCount; otherIdx++) {
       clone_t clone = clones[otherIdx];
-      if (getDistance(idx,otherIdx,1) < player.i + clone.i) {
+      if (getDistance(idx,otherIdx,1) < player.radius + clone.i) {
         //only type 3 if idx of clone is not the child
         if (clone.parentIdx == idx) {
           mergeObj(otherIdx);
-        } else if (getDistance(idx,otherIdx,1) < player.i + clone.i && clone.parentIdx !=idx) {
+        } else if (getDistance(idx,otherIdx,1) < player.radius + clone.i && clone.parentIdx !=idx) {
           //other player is absorbing clone even though it is smaller
-          if (player.i < clone.i) rescaleObj(idx,otherIdx,1);
-          if (player.i > clone.i) rescaleObj(idx,otherIdx,2);
+          if (player.radius < clone.i) rescaleObj(idx,otherIdx,1);
+          if (player.radius > clone.i) rescaleObj(idx,otherIdx,2);
         }
       }
     }
@@ -220,29 +224,26 @@ void checkPlayers() {
 }
 
 void handleFood() {
-  uint8_t idx;
-  uint8_t otherIdx;
-  
-  for (idx = 0; idx < foodCount; idx++) {
+  for (int idx = 0; idx < foodCount; idx++) {
     food_t* food = &(arrFood[idx]);  
-    for (otherIdx = 0; otherIdx < cloneCount; otherIdx++) {
+    for (int otherIdx = 0; otherIdx < cloneCount; otherIdx++) {
       clone_t* clone = &(clones[otherIdx]);
-      if (food->y > clone->y - clone->i && food->y < clone->y + clone->i 
-      && food->x > clone->x - clone->i && food->x < clone->x + clone->i) {
-        clone->i++;
-        if (clone->i <= 50) clone->speed = 50 / clone->i;
-        if (clone->i > 51) clone->speed = 1;
+      if (food->y > clone->y - clone->radius && food->y < clone->y + clone->radius 
+      && food->x > clone->x - clone->radius && food->x < clone->x + clone->radius) {
+        clone->radius++;
+        if (clone->radius <= 50) clone->speed = 50 / clone->radius;
+        if (clone->radius > 51) clone->speed = 1;
         food->x = randInt(-120,440);
         food->y = randInt(-200,320);
       }
     }
     for (otherIdx = 0; otherIdx < maxPlayers; otherIdx++) {
       player_t* player = &(players[otherIdx]);
-      if (food->y > player->y  - player->i && food->y < player->y + player->i 
-      && food->x > player->x - player->i && food->x < player->x + player->i) {
-        player->i++;
-        if (player->i <= 50) player->speed = 50 / player->i;
-        if (player->i > 51) player->speed = 1;
+      if (food->y > player->y  - player->radius && food->y < player->y + player->radius 
+      && food->x > player->x - player->radius && food->x < player->x + player->radius) {
+        player->radius++;
+        if (player->radius <= 50) player->speed = 50 / player->radius;
+        if (player->radius > 51) player->speed = 1;
         food->x = randInt(-120,440);
         food->y = randInt(-200,320);
       }
@@ -254,7 +255,7 @@ void movePlayers() {
   for (int idx = 1; idx < maxPlayers; idx++) {
     player_t* player = &(players[idx]);
     player_t enemy = players[player->eIdx];
-    if (player->i > 1.5 * enemy.i && player->eDistance < player->foodDistance) {
+    if (player->radius > 1.5 * enemy.i && player->eDistance < player->foodDistance) {
       if (player->x > enemy.x) player->x = player->x - player->speed;
       if (player->x < enemy.x) player->x = player->x + player->speed;
       if (player->y < enemy.y) player->y = player->y + player->speed;
@@ -271,9 +272,7 @@ void movePlayers() {
 }
 
 void moveClones() {
-  int idx;
-  int cloneIdx;
-  for (cloneIdx = 0; cloneIdx < cloneCount; cloneIdx++) {
+  for (int cloneIdx = 0; cloneIdx < cloneCount; cloneIdx++) {
     clone_t* clone = &(clones[cloneIdx]);
     if (clone->filled == 1) {
       player_t player = players[clone->parentIdx];
@@ -281,7 +280,7 @@ void moveClones() {
       if (clone->x < player.x) clone-> x = clone->x + clone->speed;;
       if (clone->y < 120) clone-> y = clone->y + clone->speed;
       if (clone->y > player.y) clone-> y = clone->y - clone->speed;
-      if (getDistance(0,cloneIdx,1) < player.i + clone->i) {
+      if (getDistance(0,cloneIdx,1) < player.radius + clone->radius) {
         mergeObj(cloneIdx);
       }
     }
@@ -289,17 +288,19 @@ void moveClones() {
 }
 
 void createClones(int cloneIdx) {
+  // change this to make it possible for enemy players to create clones
   player_t* player = &(players[0]);
-  if (player->i > 9) {
+  if (player->radius > 9) {
     clone_t* clone = &(clones[cloneIdx]);
     if (clone->filled == 0) {
-      player->i = player->i / 2;
-      clone->i = player->i;
+      player->radius = player->radius / 2;
+      clone->radius = player->radius;
       clone->parentColor = player->color;
       clone->dir = player->dir;
-      player->speed = 50 / player->i;
+      player->speed = 50 / player->radius;
       clone->speed = player->speed;
-      //send clone in direction of player
+      // send clone in direction of player
+      // there should not be random element to sending out clones
       if (player->dir == 1) {
         clone->y = randInt(30,70);
         clone->x = player->x;
@@ -325,6 +326,7 @@ void createClones(int cloneIdx) {
         clone->x = randInt(60,110);
         clone->y = randInt(30,70);
       }
+      // no explanation of what this does
       clone->filled = 1;
     }
   }
@@ -337,6 +339,7 @@ void moveFood() {
   int dir = player.dir;
   for (idx = 0; idx < foodCount; idx++) {
     food_t* food = &(arrFood[idx]);
+    // movement speed needs to be reduced on the intermediate directions
     if (dir == 1) {
       food->y = food->y + player.speed;
     } else if (dir == 2) {
