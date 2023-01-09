@@ -41,6 +41,8 @@ typedef struct {
   uint8_t color;
 } food_t;
 
+void shiftArray(int *arr[], int start, int end);
+
 // player functions
 void createPlayers();
 void checkPlayers();
