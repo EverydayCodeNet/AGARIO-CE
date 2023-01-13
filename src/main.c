@@ -14,32 +14,6 @@
 
 kb_key_t key;
 
-void doDeath() {
-  player_t player = players[0];
-  gfx_Begin();
-  do {
-    gfx_SetDrawBuffer();
-    kb_Scan();
-    gfx_FillScreen(224);
-    gfx_SetTextScale(2,2);
-    gfx_PrintStringXY("YOU DIED", 160 - gfx_GetStringWidth("YOU DIED") / 2,95);
-    gfx_SetTextScale(1,1);
-    gfx_SetColor(255);
-    gfx_PrintStringXY("Press any key to continue.",160 - gfx_GetStringWidth("Press any key to continue.") / 2,117);
-    gfx_PrintStringXY("Score: ", 160 - gfx_GetStringWidth("Score:   ") / 2,130);
-    gfx_PrintInt(player.i,1);
-    gfx_SwapDraw();
-  } while (!os_GetCSC());
-
-  // reset game variables
-  dead = 0;
-  srand(rtc_Time());
-  createFood();
-  clearPlayers();
-  createPlayers(); 
-  topI = 0;
-}
-
 void handleKeys(kb_key_t keyLocal) {
   uint8_t cloneIdx;
   
@@ -103,7 +77,13 @@ int main(void) {
     // drawGrid();
     drawItems();
     dispStats();
-    if (dead == 1) doDeath();
+    if (dead == 1) {
+      doDeath();
+      do {
+        drawDeathScreen();
+      } while (!os_GetCSC());
+      dead = 0;
+    }
     drawNames();
     gfx_SwapDraw();
   } while (kb_Data[6] != kb_Clear);
