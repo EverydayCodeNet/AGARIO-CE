@@ -4,6 +4,8 @@
 
 int maxPlayers = 10;
 int foodCount = 14;
+
+// are clones players?
 int cloneCount = 4;
 
 // largest player size
@@ -365,4 +367,15 @@ void moveFood() {
     if (food->x > 480 || food->x < -160) food->x = randInt(-120,440);
     if (food->y > 360 || food->y < -120) food->y = randInt(-200,320);
   }
+}
+
+void doDeath() {
+  player_t player = players[0];
+  // reset game variables
+  dead = 0;
+  srand(rtc_Time());
+  createFood();
+  clearPlayers();
+  createPlayers(); 
+  topI = 0;
 }
