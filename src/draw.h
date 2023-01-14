@@ -8,6 +8,8 @@ extern "C" {
 void clearPlayers();
 void drawItems();
 void drawNames();
+void drawDeathScreen();
+void dispStats();
 
 #ifdef __cplusplus
 }
